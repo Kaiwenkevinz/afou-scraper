@@ -10,6 +10,8 @@ from collections import namedtuple
 from collections import defaultdict
 import itertools
 
+from Course import Course 
+
 # chrome_options = webdriver.ChromeOptions()
 # chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
 # chrome_options.add_argument("--headless")
@@ -102,18 +104,18 @@ def main(input):
 
         data = load_course(term, course, course_no)
 
+
         info = []
         info_lab = []
         info_sem = []
         for class_id, section, days, times, location, open_seats, instructor, meeting_dates in data:
-            # filted_data = [days, times, location, instructor]
-            filted_data = [days, times]
+            course = Course(class_id, section, days, times, location, open_seats, instructor)
             if ("LEC" in section):
-                info.append(filted_data)
+                info.append(course)
             elif ("SEM" in section):
-                info_sem.append(filted_data)
+                info_sem.append(course)
             elif ("LAB" in section):
-                info_lab.append(filted_data)
+                info_lab.append(course)
             else:
                 print("Unknown secion: " + section)
 
@@ -123,14 +125,20 @@ def main(input):
             course_dic[course_full + "_sem"] = info_sem
         course_dic[course_full] = info
 
-    course_infos = []
-    for course, info in course_dic.items():
-        print (course)
-        print (info)
-        course_infos.append(info)
+        for c, info in course_dic.items():
+            print(c)
+            for course in info:
+                print(course)
 
-    for i in itertools.product(*course_infos):
-        print (i)
+    # course_infos = []
+    # for course, info in course_dic.items():
+    #     print (course)
+    #     print (info)
+    #     course_infos.append(info)
 
-inputs = ['ECON282', 'ECON281', 'CMPUT201']
+    # for i in itertools.product(*course_infos):
+    #     print (i)
+
+# inputs = ['ECON282', 'ECON281', 'CMPUT201']
+inputs = ['ECON282']
 main(inputs)
