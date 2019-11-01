@@ -5,8 +5,10 @@ from selenium.webdriver.common.by import By
 
 import time
 import os
-
+from datetime import datetime
+from collections import namedtuple
 from collections import defaultdict
+import itertools
 
 # chrome_options = webdriver.ChromeOptions()
 # chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
@@ -14,6 +16,42 @@ from collections import defaultdict
 # chrome_options.add_argument("--disable-dev-shm-usage")
 # chrome_options.add_argument("--no-sandbox")
 # driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
+
+def time_overlaped(t1, t2):
+    days1 = t1[0]
+    days2 = t2[0]
+
+    if days1 != days2:
+        return False
+    
+    Range = namedtuple('Range', ['start', 'end'])
+
+    tp1 = t1[1].split(" - ")
+    tp2 = t2[1].split(" - ")
+
+    tp1_a = tp1[0]
+    tp1_b = tp1[1]
+
+    tp2_a = tp2[0]
+    tp2_b = tp2[1]
+
+    FMT = '%I:%M%p'
+    tp1_a_obj = datetime.strptime(tp1_a, FMT)
+    tp1_b_obj = datetime.strptime(tp1_b, FMT)
+    tp2_a_obj = datetime.strptime(tp2_a, FMT)
+    tp2_b_obj = datetime.strptime(tp2_b, FMT)
+
+    r1 = Range(start=tp1_a_obj, end=tp1_b_obj)
+    r2 = Range(start=tp2_a_obj, end=tp2_b_obj)
+
+    latest_start = max(r1.start, r2.start)
+    earliest_end = min(r1.end, r2.end)
+    time_delta = latest_start - earliest_end
+
+    if time_delta.days < 0:
+        return True
+    else:
+        return False
 
 def load_course(term, course, course_no):
     driver = webdriver.Chrome('./chromedriver.exe')
@@ -65,13 +103,34 @@ def main(input):
         data = load_course(term, course, course_no)
 
         info = []
+        info_lab = []
+        info_sem = []
         for class_id, section, days, times, location, open_seats, instructor, meeting_dates in data:
-            info.append([days, times, location, instructor])
+            # filted_data = [days, times, location, instructor]
+            filted_data = [days, times]
+            if ("LEC" in section):
+                info.append(filted_data)
+            elif ("SEM" in section):
+                info_sem.append(filted_data)
+            elif ("LAB" in section):
+                info_lab.append(filted_data)
+            else:
+                print("Unknown secion: " + section)
+
+        if info_lab:
+            course_dic[course_full + "_lab"] = info_lab
+        if info_sem:
+            course_dic[course_full + "_sem"] = info_sem
         course_dic[course_full] = info
 
+    course_infos = []
     for course, info in course_dic.items():
         print (course)
         print (info)
-        
-inputs = ['ECON281', 'ECON282']
+        course_infos.append(info)
+
+    for i in itertools.product(*course_infos):
+        print (i)
+
+inputs = ['ECON282', 'ECON281', 'CMPUT201']
 main(inputs)
