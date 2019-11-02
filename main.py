@@ -56,7 +56,8 @@ def time_overlaped(t1, t2):
         return False
 
 def load_course(term, course, course_no):
-    driver = webdriver.Chrome('./chromedriver.exe')
+    # driver = webdriver.Chrome('./chromedriver.exe')
+    driver = webdriver.Chrome('./chromedriver')
     driver.get('https://www.beartracks.ualberta.ca/psc/uahegprd/EMPLOYEE/HRMS/c/COMMUNITY_ACCESS.CLASS_SEARCH.GBL?')
 
     # term
@@ -104,12 +105,11 @@ def main(input):
 
         data = load_course(term, course, course_no)
 
-
         info = []
         info_lab = []
         info_sem = []
         for class_id, section, days, times, location, open_seats, instructor, meeting_dates in data:
-            course = Course(class_id, section, days, times, location, open_seats, instructor)
+            course = Course(course_full, class_id, section, days, times, location, open_seats, instructor)
             if ("LEC" in section):
                 info.append(course)
             elif ("SEM" in section):
@@ -125,20 +125,59 @@ def main(input):
             course_dic[course_full + "_sem"] = info_sem
         course_dic[course_full] = info
 
-        for c, info in course_dic.items():
-            print(c)
-            for course in info:
-                print(course)
+    # for c, info in course_dic.items():
+    #     print(c)
+    #     for course in info:
+    #         print(course)
 
-    # course_infos = []
-    # for course, info in course_dic.items():
-    #     print (course)
-    #     print (info)
-    #     course_infos.append(info)
+    course_infos = []
+    for course, info in course_dic.items():
+        course_infos.append(info)
 
-    # for i in itertools.product(*course_infos):
-    #     print (i)
+    all_combos = []
+    for i in itertools.product(*course_infos):
+        all_combos.append(i)
+    
+    i = 0
+    res = []
+    while i < len(all_combos):
+        j = 0
+        k = 0
+        combo = all_combos[i]
+        overlapped = False
+        valid = False
+                
+        # print('-----')
+        # for c in combo:
+        #     print(c, end='')
+        #     print("  ", end='')
+        # print('')
 
-# inputs = ['ECON282', 'ECON281', 'CMPUT201']
-inputs = ['ECON282']
+        while (j < len(combo) - 1) and (not overlapped):
+            c1 = combo[j]
+            k = j + 1
+            while (k < len(combo)) and (not overlapped):
+                c2 = combo[k]
+                # print(c1)
+                # print(c2)
+                if c1 == c2:
+                    # print('overlap')
+                    overlapped = True
+                    break
+                else:
+                    valid = True
+                k += 1
+            j += 1
+        if overlapped == False and valid:
+            res.append(combo)
+        i += 1
+
+    for combo in res:
+        for c in combo:
+            print(c, end='')
+            print(" ^ ", end='')
+        print('')
+
+
+inputs = ['ECON282', 'ECON281', 'CMPUT201']
 main(inputs)
