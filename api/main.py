@@ -12,16 +12,20 @@ import itertools
 
 from .Course import Course 
 
-# chrome_options = webdriver.ChromeOptions()
-# chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
-# chrome_options.add_argument("--headless")
-# chrome_options.add_argument("--disable-dev-shm-usage")
-# chrome_options.add_argument("--no-sandbox")
-# driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
+
 
 def load_course(term, course, course_no):
+
     # driver = webdriver.Chrome('./chromedriver')
-    driver = webdriver.Chrome('./api/chromedriver')
+    # driver = webdriver.Chrome('./api/chromedriver')
+    
+    chrome_options = webdriver.ChromeOptions()
+    chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
+    chrome_options.add_argument("--headless")
+    chrome_options.add_argument("--disable-dev-shm-usage")
+    chrome_options.add_argument("--no-sandbox")
+    driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
+
     driver.get('https://www.beartracks.ualberta.ca/psc/uahegprd/EMPLOYEE/HRMS/c/COMMUNITY_ACCESS.CLASS_SEARCH.GBL?')
 
     # term
@@ -145,7 +149,7 @@ def main(term, inputs):
     #         print(" ^ ", end='')
     #     print('')
 
-    print(len(res))
+    # print(len(res))
     
     return (res)
 
