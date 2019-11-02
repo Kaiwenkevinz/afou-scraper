@@ -10,7 +10,7 @@ from collections import namedtuple
 from collections import defaultdict
 import itertools
 
-from Course import Course 
+from .Course import Course 
 
 # chrome_options = webdriver.ChromeOptions()
 # chrome_options.binary_location = os.environ.get("GOOGLE_CHROME_BIN")
@@ -19,45 +19,9 @@ from Course import Course
 # chrome_options.add_argument("--no-sandbox")
 # driver = webdriver.Chrome(executable_path=os.environ.get("CHROMEDRIVER_PATH"), chrome_options=chrome_options)
 
-def time_overlaped(t1, t2):
-    days1 = t1[0]
-    days2 = t2[0]
-
-    if days1 != days2:
-        return False
-    
-    Range = namedtuple('Range', ['start', 'end'])
-
-    tp1 = t1[1].split(" - ")
-    tp2 = t2[1].split(" - ")
-
-    tp1_a = tp1[0]
-    tp1_b = tp1[1]
-
-    tp2_a = tp2[0]
-    tp2_b = tp2[1]
-
-    FMT = '%I:%M%p'
-    tp1_a_obj = datetime.strptime(tp1_a, FMT)
-    tp1_b_obj = datetime.strptime(tp1_b, FMT)
-    tp2_a_obj = datetime.strptime(tp2_a, FMT)
-    tp2_b_obj = datetime.strptime(tp2_b, FMT)
-
-    r1 = Range(start=tp1_a_obj, end=tp1_b_obj)
-    r2 = Range(start=tp2_a_obj, end=tp2_b_obj)
-
-    latest_start = max(r1.start, r2.start)
-    earliest_end = min(r1.end, r2.end)
-    time_delta = latest_start - earliest_end
-
-    if time_delta.days < 0:
-        return True
-    else:
-        return False
-
 def load_course(term, course, course_no):
-    # driver = webdriver.Chrome('./chromedriver.exe')
-    driver = webdriver.Chrome('./chromedriver')
+    # driver = webdriver.Chrome('./chromedriver')
+    driver = webdriver.Chrome('./api/chromedriver')
     driver.get('https://www.beartracks.ualberta.ca/psc/uahegprd/EMPLOYEE/HRMS/c/COMMUNITY_ACCESS.CLASS_SEARCH.GBL?')
 
     # term
@@ -75,7 +39,7 @@ def load_course(term, course, course_no):
     inputElement.send_keys(course_no)
     time.sleep(1)
     inputElement.send_keys(Keys.ENTER)
-    time.sleep(3)
+    time.sleep(5)
 
     table = driver.find_element_by_id("ACE_$ICField48$0")
     tds = table.find_elements_by_xpath("//td[@class='PSLEVEL3GRIDROW']")
@@ -92,8 +56,7 @@ def load_course(term, course, course_no):
 
     return res
 
-def main(input):
-    term = '1690 - Fall Term 2019'
+def main(term, inputs):
     course = 'ECON'
     course_no = '282'
 
@@ -109,12 +72,16 @@ def main(input):
         info_lab = []
         info_sem = []
         for class_id, section, days, times, location, open_seats, instructor, meeting_dates in data:
-            course = Course(course_full, class_id, section, days, times, location, open_seats, instructor)
             if ("LEC" in section):
+                course = Course(course_full, class_id, section, days, times, location, open_seats, instructor)
                 info.append(course)
             elif ("SEM" in section):
+                course_full += " SEM"
+                course = Course(course_full, class_id, section, days, times, location, open_seats, instructor)
                 info_sem.append(course)
             elif ("LAB" in section):
+                course_full += " LAB"
+                course = Course(course_full, class_id, section, days, times, location, open_seats, instructor)
                 info_lab.append(course)
             else:
                 print("Unknown secion: " + section)
@@ -172,12 +139,19 @@ def main(input):
             res.append(combo)
         i += 1
 
-    for combo in res:
-        for c in combo:
-            print(c, end='')
-            print(" ^ ", end='')
-        print('')
+    # for combo in res:
+    #     for c in combo:
+    #         print(c, end='')
+    #         print(" ^ ", end='')
+    #     print('')
+
+    print(len(res))
+    
+    return (res)
 
 
-inputs = ['ECON282', 'ECON281', 'CMPUT201']
-main(inputs)
+
+# inputs = ['ECON282', 'ECON281']
+# term = '1690 - Fall Term 2019' 
+
+# main(term, inputs)

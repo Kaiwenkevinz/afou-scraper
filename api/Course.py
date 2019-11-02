@@ -1,8 +1,8 @@
 from datetime import datetime
 from collections import namedtuple
 
-class Course():
-    def __init__(self, course=None, class_id=None, section=None, days=None, times=None, location=None, open_seats=None, instructor=None):
+class Course(object):
+    def __init__(self, course, class_id, section, days, times, location, open_seats, instructor):
         self.class_id = class_id
         self.course = course
         self.section = section
@@ -20,7 +20,7 @@ class Course():
         days1 = t1[0]
         days2 = t2[0]
 
-        if days1 != days2:
+        if days1 != days2 and (days1 not in days2) and (days2 not in days1):
             return False
         
         Range = namedtuple('Range', ['start', 'end'])
@@ -54,8 +54,3 @@ class Course():
 
     def __str__(self):
         return self.course + ' ' + self.days + ' ' + self.times
-
-# c1 = Course(days="M W F", times="6:30PM - 9:30PM")
-# c2 = Course(days="M W F", times="6:30PM - 9:30PM")
-
-# print(c1 == c2)
