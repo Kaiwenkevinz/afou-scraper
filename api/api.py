@@ -5,7 +5,10 @@ from datetime import datetime
 import jsonpickle
 import ast
 
-from .main import main
+from rq import Queue
+import django_rq
+
+from .work import entry
 
 @api_view(['GET'])
 def schedules(request):
@@ -20,18 +23,32 @@ def schedules(request):
     inputs = inputs.split(',')
 
     print("term: " , term)
+    print("courses: " , inputs)
 
-    res = main(term, inputs)
+    # job = q.enqueue(work, term, inputs)
+    job = django_rq.enqueue(entry, term)
+
+    print("job id: " + job.id)
+    print("job status: " + job.get_status())
+
+    while(not job.result):
+        print(job.get_status())
+
+    print("job status: " + job.get_status())
+    print(job.result)
+
+    res = job.result
+    # res = work(term, inputs)
     res_encoded = []
-    for courses in res:
-        temp = []
-        for course in courses:
-            course_encoded = jsonpickle.encode(course, unpicklable=False)
-            temp.append(ast.literal_eval(course_encoded))
-        res_encoded.append(temp)
+    # for courses in res:
+    #     temp = []
+    #     for course in courses:
+    #         course_encoded = jsonpickle.encode(course, unpicklable=False)
+    #         temp.append(ast.literal_eval(course_encoded))
+    #     res_encoded.append(temp)
 
     # for courses in res_encoded:
     #     for course in courses:
     #         print(course)
 
-    return Response(res_encoded)
+    return Response(job.result)

@@ -16,7 +16,6 @@ import django_heroku
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
-
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/2.2/howto/deployment/checklist/
 
@@ -38,7 +37,8 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'api'
+    'api',
+    "django_rq"
 ]
 
 MIDDLEWARE = [
@@ -82,6 +82,21 @@ DATABASES = {
     }
 }
 
+
+RQ_QUEUES = {
+    'default': {
+        'URL': os.getenv('REDISTOGO_URL', 'redis://redistogo:285361d6e12405a5e01a8e8b3a1759cc@tarpon.redistogo.com:10005/'), # If you're on Heroku
+        'DEFAULT_TIMEOUT': 500,
+    },
+    'high': {
+        'URL': os.getenv('REDISTOGO_URL', 'redis://redistogo:285361d6e12405a5e01a8e8b3a1759cc@tarpon.redistogo.com:10005/'), # If you're on Heroku
+        'DEFAULT_TIMEOUT': 500,
+    },
+    'low': {
+        'URL': os.getenv('REDISTOGO_URL', 'redis://redistogo:285361d6e12405a5e01a8e8b3a1759cc@tarpon.redistogo.com:10005/'), # If you're on Heroku
+        'DEFAULT_TIMEOUT': 500,
+    }
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/2.2/ref/settings/#auth-password-validators
