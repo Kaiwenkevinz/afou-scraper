@@ -14,25 +14,24 @@ def schedules(request):
     # inputs = ['CMPUT174', 'ECON281']
     # term = '1690 - Fall Term 2019' 
 
-    # params = request.query_params.dict()
-    # term = params["term"]
-    # inputs = params["courses"]
-    # inputs = inputs.split(',')
+    params = request.query_params.dict()
+    term = params["term"]
+    inputs = params["courses"]
+    inputs = inputs.split(',')
 
-    # print("term: " , term)
+    print("term: " , term)
 
-    # res = main(term, inputs)
-    # res_encoded = []
-    # for courses in res:
-    #     temp = []
-    #     for course in courses:
-    #         course_encoded = jsonpickle.encode(course, unpicklable=False)
-    #         temp.append(ast.literal_eval(course_encoded))
-    #     res_encoded.append(temp)
+    res = main(term, inputs)
+    res_encoded = []
+    for courses in res:
+        temp = []
+        for course in courses:
+            course_encoded = jsonpickle.encode(course, unpicklable=False)
+            temp.append(ast.literal_eval(course_encoded))
+        res_encoded.append(temp)
 
     # for courses in res_encoded:
     #     for course in courses:
     #         print(course)
-    res_encoded = "something wrong with Seleium"
 
     return Response(res_encoded)
