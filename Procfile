@@ -1,1 +1,1 @@
-web: gunicorn afou-scrape.wsgi
+web: gunicorn afou-scraper.wsgi
