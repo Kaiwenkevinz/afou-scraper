@@ -1,11 +1,13 @@
 from rest_framework import status
 from rest_framework.decorators import api_view
 from rest_framework.response import Response
+from django.http import JsonResponse
 from datetime import datetime
 import jsonpickle
 import ast
 
 from rq import Queue
+from rq.job import Job
 import django_rq
 
 from .work import entry
@@ -20,35 +22,45 @@ def schedules(request):
     params = request.query_params.dict()
     term = params["term"]
     inputs = params["courses"]
+    job_id = params["job_id"]
+
     inputs = inputs.split(',')
 
     print("term: " , term)
     print("courses: " , inputs)
 
-    # job = q.enqueue(work, term, inputs)
-    job = django_rq.enqueue(entry, term)
+    if job_id:
+        print("job already in queue")
+        redis_conn = django_rq.get_connection('default')
+        job = Job.fetch(job_id, connection=redis_conn)
+        print("fetched job")
 
-    print("job id: " + job.id)
-    print("job status: " + job.get_status())
+    else:
+        print("create new job")
+        job = django_rq.enqueue(entry, term, inputs)
+        print("job id: " + job.id)
 
-    while(not job.result):
-        print(job.get_status())
+    if (job.result):
+        res = job.result
+        res_encoded = []
+        for courses in res:
+            temp = []
+            for course in courses:
+                course_encoded = jsonpickle.encode(course, unpicklable=False)
+                temp.append(ast.literal_eval(course_encoded))
+            res_encoded.append(temp)
 
-    print("job status: " + job.get_status())
-    print(job.result)
+        data = {
+            'status': 'success',
+            'data': res_encoded
+        }
 
-    res = job.result
-    # res = work(term, inputs)
-    res_encoded = []
-    # for courses in res:
-    #     temp = []
-    #     for course in courses:
-    #         course_encoded = jsonpickle.encode(course, unpicklable=False)
-    #         temp.append(ast.literal_eval(course_encoded))
-    #     res_encoded.append(temp)
+        return Response(data)
+    
+    data = {
+        'status': 'processing',
+        'job_id': job.id
+    }
 
-    # for courses in res_encoded:
-    #     for course in courses:
-    #         print(course)
+    return JsonResponse(data)
 
-    return Response(job.result)
